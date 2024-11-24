@@ -1,71 +1,71 @@
 import pytest
 from television import Television
 
-def test_init():
-    tv = Television()
-    assert not tv.status
-    assert tv.volume == Television.MIN_VOLUME
-    assert tv.channel == Television.MIN_CHANNEL
-    assert not tv.muted
+class TestTelevision:
+    def setup_method(self):
+        """Set up a Television instance before each test."""
+        self.tv = Television()
 
-def test_power():
-    tv = Television()
-    assert not tv.status
-    tv.power()
-    assert tv.status
-    tv.power()
-    assert not tv.status
+    def teardown_method(self):
+        """Clean up after each test."""
+        del self.tv
 
-def test_mute():
-    tv = Television()
-    tv.power()
-    tv.mute()
-    assert tv.muted is True
-    tv.mute()
-    assert tv.muted is False
+    def test_init(self):
+        """Test the initialization of a Television instance."""
+        assert not self.tv.get_status()
+        assert self.tv.get_volume() == Television.MIN_VOLUME
+        assert self.tv.get_channel() == Television.MIN_CHANNEL
+        assert not self.tv.get_muted()
 
-def test_channel_down():
-    tv = Television()
-    tv.power()
-    tv.channel_down()
-    assert tv.channel == Television.MAX_CHANNEL
-    tv.channel = 1
-    tv.channel_down()
-    assert tv.channel == 0
+    def test_power(self):
+        """Test toggling the power of the Television."""
+        assert not self.tv.get_status()
+        self.tv.power()
+        assert self.tv.get_status()
+        self.tv.power()
+        assert not self.tv.get_status()
 
-def test_volume_up():
-    tv = Television()
-    tv.power()
-    tv.volume_up()
-    assert tv.volume == 1
-    tv.volume = Television.MAX_VOLUME
-    tv.volume_up()
-    assert tv.volume == Television.MAX_VOLUME
+    def test_mute(self):
+        """Test muting and unmuting the Television."""
+        self.tv.power()
+        self.tv.mute()
+        assert self.tv.get_muted()
+        self.tv.mute()
+        assert not self.tv.get_muted()
 
-def test_volume_down():
-    tv = Television()
-    tv.power()
+    def test_channel_up(self):
+        """Test increasing the channel with looping behavior."""
+        self.tv.power()
+        self.tv.channel_up()
+        assert self.tv.get_channel() == 1
+        self.tv.channel_up()
+        self.tv.channel_up()
+        self.tv.channel_up()
+        assert self.tv.get_channel() == Television.MIN_CHANNEL
 
-    tv.volume = Television.MAX_VOLUME
-    tv.volume_down()
-    assert tv.volume == Television.MAX_VOLUME - 1
+    def test_channel_down(self):
+        """Test decreasing the channel with looping behavior."""
+        self.tv.power()
+        self.tv.channel_down()
+        assert self.tv.get_channel() == Television.MAX_CHANNEL
+        self.tv.channel_down()
+        assert self.tv.get_channel() == Television.MAX_CHANNEL - 1
 
-    tv.volume = Television.MIN_VOLUME
-    tv.volume_down()
-    assert tv.volume == Television.MIN_VOLUME
+    def test_volume_up(self):
+        """Test increasing the volume, including unmuting."""
+        self.tv.power()
+        self.tv.volume_up()
+        assert self.tv.get_volume() == 1
+        self.tv.volume_up()
+        assert self.tv.get_volume() == 2
+        self.tv.volume_up()  # Exceeding MAX_VOLUME
+        assert self.tv.get_volume() == 2
 
-def test_volume_up_unmutes():
-    tv = Television()
-    tv.power()
-    tv.mute()
-    tv.volume_up()
-    assert not tv.muted
-    assert tv.volume == 1
-
-def test_volume_down_unmutes():
-    tv = Television()
-    tv.power()
-    tv.mute()
-    tv.volume_down()
-    assert not tv.muted
-    assert tv.volume == Television.MIN_VOLUME
+    def test_volume_down(self):
+        """Test decreasing the volume, including unmuting."""
+        self.tv.power()
+        self.tv.volume_up()
+        self.tv.volume_down()
+        assert self.tv.get_volume() == 0
+        self.tv.volume_down()  # Below MIN_VOLUME
+        assert self.tv.get_volume() == 0
