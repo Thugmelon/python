@@ -131,8 +131,8 @@ class Television:
 
         Returns:
             str: A string in the format
-            "Power = [On/Off], Channel = [channel], Volume = [volume/Muted]
+            "Power = True/False, Channel = X, Volume = X"
         '''
-        power_status = "On" if self.__status else "Off"
-        volume_status = "Muted" if self.__muted else str(self.__volume)
-        return f'Power = [{power_status}], Channel = [{self.__channel}], Volume = [{volume_status}]'
+        return (f'Power = {self.__status}, '
+                f'Channel = {self.__channel}, '
+                f'Volume = {self.__volume}')
